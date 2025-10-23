@@ -59,7 +59,11 @@
 	ini_set('post_max_size', '128M');
 	ini_set('upload_max_filesize', '128M');
  
-	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'production');
+	// LOCAL DEVELOPMENT ENVIRONMENT
+	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
+	
+	// TO SWITCH BACK TO PRODUCTION, CHANGE ABOVE TO:
+	// define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'production');
 
 /*
  *---------------------------------------------------------------

@@ -141,12 +141,22 @@ $route['install'] = 'install/index';
 $route['404_override'] = 'errors';
 
 // API Routes - These need to be placed before the catch-all route
+$route['api/v1/auth/login'] = 'api/authLogin';
 $route['api/teacherLogin'] = 'api/teacherLogin';
 $route['api/teacherAttendance'] = 'api/teacherAttendance';
 $route['api/teacherSelfAttendance'] = 'api/teacherSelfAttendance';
 $route['api/teacherPresentDaysCount'] = 'api/teacherPresentDaysCount';
 $route['api/teacherAbsentDaysCount'] = 'api/teacherAbsentDaysCount';
 $route['api/teacherProfile'] = 'api/teacherProfile';
+$route['api/updateTeacherProfile'] = 'api/updateTeacherProfile';
+$route['api/enrollFaceImage'] = 'api/enrollFaceImage';
+$route['api/verifyFaceImage'] = 'api/verifyFaceImage';
+$route['api/f2f/register'] = 'api/f2fRegister';
+$route['api/f2f/analyze'] = 'api/f2fAnalyze';
+$route['api/f2f/list'] = 'api/f2fList';
+$route['api/f2f/create'] = 'api/f2fCreate';
+$route['api/f2f/attach'] = 'api/f2fAttach';
+$route['api/f2f/attachImage'] = 'api/f2fAttachImage';
 
 if ($saas_default) {
 	$route['default_controller'] = 'saas_website/index';
