@@ -8,7 +8,8 @@ All endpoints require teacher authentication. Teachers must be logged in with ro
 
 ## Endpoints
 
-### 1. Get Class List
+### 1. Get Class List    
+yasir
 
 **Endpoint:** `POST /api/getClassList`
 
