@@ -1,0 +1,49 @@
+# Sensitive files
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+*.env
+.env.local
+.env.production
+.env.staging
+
+# Configuration files with secrets
+config/secrets.php
+config/database.php
+application/config/database.php
+
+# Logs
+*.log
+application/logs/*
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Cache
+application/cache/*
+!application/cache/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node modules (if any)
+node_modules/
+
+# Composer
+vendor/
+
+# Backup files
+*.bak
+*.backup
