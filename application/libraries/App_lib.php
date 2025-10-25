@@ -145,8 +145,16 @@ class App_lib
 
     public function verify_password($password, $encrypt_password)
     {
-        $hashed = password_verify($password, $encrypt_password);
-        return $hashed;
+        // Check if it's a bcrypt hash (starts with $2y$)
+        if (strpos($encrypt_password, '$2y$') === 0) {
+            return password_verify($password, $encrypt_password);
+        }
+        // Check if it's an MD5 hash (32 characters, hexadecimal)
+        elseif (strlen($encrypt_password) === 32 && ctype_xdigit($encrypt_password)) {
+            return md5($password) === $encrypt_password;
+        }
+        // Fallback to password_verify for other formats
+        return password_verify($password, $encrypt_password);
     }
 
     public function getStaffList($branch_id = '', $role='')

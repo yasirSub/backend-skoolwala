@@ -66,7 +66,26 @@
 								data-original-title="<?=translate('profile')?>">
 									<i class="far fa-arrow-alt-circle-right"></i>
 								</a>
-							<?php endif; if (get_permission('employee', 'is_delete')): ?>
+							<?php endif; ?>
+							
+							<?php 
+							// Show face enrollment status ONLY for Teachers (role_id = 3)
+							if ($row->role_id == 3): 
+								$face_enrolled = $this->db->get_where('staff_face', array('staff_id' => $row->id))->row();
+								if ($face_enrolled): ?>
+									<span class="badge badge-success" data-toggle="tooltip" 
+									data-original-title="Face Enrolled - Read Only Status">
+										<i class="fas fa-user-check"></i> Enrolled
+									</span>
+								<?php else: ?>
+									<span class="badge badge-secondary" data-toggle="tooltip" 
+									data-original-title="Face Not Enrolled - Read Only Status">
+										<i class="fas fa-user-times"></i> Not Enrolled
+									</span>
+								<?php endif; 
+							endif; ?>
+							
+							<?php if (get_permission('employee', 'is_delete')): ?>
 								<?php echo btn_delete('employee/delete/' . $row->id); ?>
 							<?php endif; ?>
 							</td>
@@ -78,3 +97,9 @@
 		</div>
 	</div>
 </section>
+
+<!-- Face Enrollment Modal - DISABLED -->
+<!-- Face enrollment feature has been disabled for security reasons -->
+
+<!-- Face Enrollment JavaScript - DISABLED -->
+<!-- All face enrollment functionality has been removed for security reasons -->

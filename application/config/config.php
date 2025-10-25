@@ -409,7 +409,7 @@ $config['sess_regenerate_destroy'] = FALSE;
 $config['cookie_prefix']	= '';
 $config['cookie_domain']	= '';
 $config['cookie_path']		= '/';
-$config['cookie_secure']	= TRUE;
+$config['cookie_secure']	= FALSE; // Set to FALSE for HTTP connections
 $config['cookie_httponly'] 	= TRUE;
 
 /*
@@ -455,14 +455,14 @@ $config['global_xss_filtering'] = TRUE;
 | 'csrf_exclude_uris' = Array of URIs which ignore CSRF checks
 */
 // $config['csrf_exclude_uris'] = array('api/teacherAttendance');
-$config['csrf_protection'] = TRUE;
+$config['csrf_protection'] = FALSE; // Temporarily disabled to fix login issues
 $config['csrf_token_name'] = 'school_csrf_name';
 $config['csrf_cookie_name'] = 'school_cookie_name';
-$config['csrf_expire'] = 7200;
+$config['csrf_expire'] = 86400; // 24 hours instead of 2 hours
 $config['csrf_regenerate'] = FALSE;
-$config['csrf_exclude_uris'] = array('api/v1/auth/login','api/verifyFace','api/enrollFace','api/enrollFaceImage','api/verifyFaceImage','api/f2f/register','api/f2f/analyze','api/f2f/list','api/f2f/create','api/f2f/attach','api/f2f/attachImage','api/teacherFaceAttendance','api/teacherMonthlyAbsentCount','api/teacherMonthlyPresentCount','api/teacherLogout','api/staffQrAttendance','api/teacherLogin', 'api/teacherSelfAttendance', 'api/teacherProfile', 'api/updateTeacherProfile', 'api/teacherPresentDaysCount', 'api/teacherAbsentDaysCount', 'api/getSchoolInfo', 'api/getClassList', 'api/getSectionListByClass', 'api/getStudentList', 'api/studentAttendance');
+$config['csrf_exclude_uris'] = array('api/v1/auth/login','api/verifyFace','api/enrollFace','api/enrollFaceImage','api/verifyFaceImage','api/face/enroll','api/face/identify','api/face/check-duplicate','api/face/analyze','api/face/testAnalyzer','api/face/enrollment/check','api/face/delete','api/checkFaceDuplicate','api/listEnrolledFaces','api/face/enroll3D','api/face/identify3D','api/face/list3D','api/create3DFaceTable','api/f2f/register','api/f2f/analyze','api/f2f/list','api/f2f/create','api/f2f/attach','api/f2f/attachImage','api/f2f/delete','api/f2f/deleteAll','api/f2f/checkFace','api/f2f/testController','api/f2f/testDelete','api/teacherFaceAttendance','api/teacherMonthlyAbsentCount','api/teacherMonthlyPresentCount','api/teacherLogout','api/staffQrAttendance','api/teacherLogin', 'api/teacherSelfAttendance', 'api/teacherProfile', 'api/updateTeacherProfile', 'api/teacherPresentDaysCount', 'api/teacherAbsentDaysCount', 'api/getSchoolInfo', 'api/getClassList', 'api/getSectionListByClass', 'api/getStudentList', 'api/studentAttendance', 'api/attendance/today', 'api/attendance/mark', 'api/quickAttendance', 'api/attendanceForTeacher', 'api/deleteAttendance', 'api/generateDummyData', 'api/testGenerateDummyData', 'api/school-location/set', 'api/school-location/list', 'api/school-location/check', 'api/school-location/delete', 'api/authLogin', 'api/markStudentAttendance', 'api/markAllStudentsAttendance');
 
-if($config['csrf_protection'] == TRUE && isset($_SERVER['REQUEST_URI']) && (strpos($_SERVER['REQUEST_URI'],'feespayment/') !== FALSE || strpos($_SERVER['REQUEST_URI'],'admissionpayment/') !== FALSE || strpos($_SERVER['REQUEST_URI'],'onlineexam_payment/') !== FALSE || strpos($_SERVER['REQUEST_URI'],'subscription/') !== FALSE || strpos($_SERVER['REQUEST_URI'], 'saas_payment/') !== FALSE)){
+if($config['csrf_protection'] == TRUE && isset($_SERVER['REQUEST_URI']) && (strpos($_SERVER['REQUEST_URI'],'feespayment/') !== FALSE || strpos($_SERVER['REQUEST_URI'],'admissionpayment/') !== FALSE || strpos($_SERVER['REQUEST_URI'],'onlineexam_payment/') !== FALSE || strpos($_SERVER['REQUEST_URI'],'subscription/') !== FALSE || strpos($_SERVER['REQUEST_URI'], 'saas_payment/') !== FALSE || strpos($_SERVER['REQUEST_URI'], '/api/') !== FALSE)){
     $config['csrf_protection'] = FALSE;
 }
 
@@ -551,5 +551,6 @@ $config['allowed_frontend_origins'] = array(
     'http://127.0.0.1:5173',
     'http://127.0.0.1:8080',
     'http://192.168.31.129',
-    'http://192.168.31.129:8000'
+    'http://192.168.31.129:8000',
+    'http://192.168.31.129:8080'
 );

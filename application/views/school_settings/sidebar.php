@@ -24,6 +24,8 @@ if ($this->input->get('branch_id')) {
             <li <?=$sub_page == 'school_settings/whatsapp_settings' ? 'class="active"' : '';?>><a href="<?=base_url('school_settings/whatsapp_setting' . $url)?>"><i class="fab fa-whatsapp"></i> <?=translate('whatsapp_settings')?></a></li>
         <?php } if (moduleIsEnabled('attendance')) { ?>
             <li <?=$sub_page == 'school_settings/attendance_type' ? 'class="active"' : '';?>><a href="<?=base_url('school_settings/attendance_type' . $url)?>"><i class="fa-solid fa-signal"></i> <?=translate('attendance_type')?></a></li>
+        <?php } if (get_permission('school_settings', 'is_view')) { ?>
+            <li <?=$sub_page == 'school_settings/location_settings' ? 'class="active"' : '';?>><a href="<?=base_url('school_settings/location_settings' . $url)?>"><i class="fas fa-map-marker-alt"></i> Location Settings</a></li>
         <?php } ?>
         </ul>
     </div>

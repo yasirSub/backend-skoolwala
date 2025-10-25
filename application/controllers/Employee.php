@@ -770,4 +770,176 @@ class Employee extends Admin_Controller
         $data = file_get_contents('uploads/multi_employee_sample.csv');
         force_download("multi_employee_sample.csv", $data);
     }
+
+    /* check face enrollment status for staff - DISABLED */
+    public function checkFaceStatus($staff_id = '')
+    {
+        // Face enrollment feature has been disabled for security reasons
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Face enrollment feature has been disabled'
+        ]);
+        return;
+    }
+
+    /* self attendance view for logged-in employee (Teachers only - Role 3) */
+    public function self_attendance()
+    {
+        // Only allow teachers (role 3) to access self-attendance
+        if (loggedin_role_id() != 3) {
+            access_denied();
+        }
+
+        // Get logged-in user's staff ID
+        $loggedin_user_id = get_loggedin_user_id();
+        
+        // Get staff information
+        $this->db->select('staff.*, staff_designation.name as designation_name, staff_department.name as department_name');
+        $this->db->from('staff');
+        $this->db->join('staff_designation', 'staff_designation.id = staff.designation', 'left');
+        $this->db->join('staff_department', 'staff_department.id = staff.department', 'left');
+        $this->db->where('staff.id', $loggedin_user_id);
+        $staff_info = $this->db->get()->row();
+
+        if (!$staff_info) {
+            show_404();
+        }
+
+        // Initialize variables
+        $attendance_records = array();
+        $filter_type = 'month'; // Default to month view
+        $filter_value = date('Y-m'); // Default to current month
+        
+        // Check if new location columns exist in the database
+        $has_check_in_out_columns = false;
+        try {
+            $result = $this->db->query("SHOW COLUMNS FROM `staff_attendance` LIKE 'check_in_location_id'");
+            $has_check_in_out_columns = $result->num_rows() > 0;
+        } catch (Exception $e) {
+            // Columns don't exist
+            $has_check_in_out_columns = false;
+        }
+        
+        // Handle filtering
+        if ($_POST) {
+            $filter_type = $this->input->post('filter_type');
+            $filter_value = $this->input->post('filter_value');
+            
+            // Build query based on whether new columns exist
+            if ($has_check_in_out_columns) {
+                // Include check-in and check-out location data
+                $this->db->select('staff_attendance.*, 
+                                   attendance_locations.latitude, attendance_locations.longitude,
+                                   check_in_loc.latitude as check_in_loc_lat, check_in_loc.longitude as check_in_loc_lng,
+                                   check_out_loc.latitude as check_out_loc_lat, check_out_loc.longitude as check_out_loc_lng');
+                $this->db->from('staff_attendance');
+                $this->db->join('attendance_locations', 'staff_attendance.location_id = attendance_locations.id', 'left');
+                $this->db->join('attendance_locations as check_in_loc', 'staff_attendance.check_in_location_id = check_in_loc.id', 'left');
+                $this->db->join('attendance_locations as check_out_loc', 'staff_attendance.check_out_location_id = check_out_loc.id', 'left');
+            } else {
+                // Only include basic location data
+                $this->db->select('staff_attendance.*, 
+                                   attendance_locations.latitude, attendance_locations.longitude');
+                $this->db->from('staff_attendance');
+                $this->db->join('attendance_locations', 'staff_attendance.location_id = attendance_locations.id', 'left');
+            }
+            
+            $this->db->where('staff_attendance.staff_id', $loggedin_user_id);
+            
+            if ($filter_type == 'month') {
+                // Filter by month (YYYY-MM format)
+                $this->db->like('staff_attendance.date', $filter_value, 'after');
+            } elseif ($filter_type == 'daterange') {
+                // Filter by date range (YYYY-MM-DD to YYYY-MM-DD)
+                $date_range = explode(' to ', $filter_value);
+                if (count($date_range) == 2) {
+                    $start_date = trim($date_range[0]);
+                    $end_date = trim($date_range[1]);
+                    $this->db->where('staff_attendance.date >=', $start_date);
+                    $this->db->where('staff_attendance.date <=', $end_date);
+                }
+            } elseif ($filter_type == 'year') {
+                // Filter by year
+                $this->db->like('staff_attendance.date', $filter_value, 'after');
+            }
+            
+            $this->db->order_by('staff_attendance.date', 'DESC');
+            $query = $this->db->get();
+            if ($query) {
+                $attendance_records = $query->result();
+            }
+        } else {
+            // Default: Show current month
+            if ($has_check_in_out_columns) {
+                // Include check-in and check-out location data
+                $this->db->select('staff_attendance.*, 
+                                   attendance_locations.latitude, attendance_locations.longitude,
+                                   check_in_loc.latitude as check_in_loc_lat, check_in_loc.longitude as check_in_loc_lng,
+                                   check_out_loc.latitude as check_out_loc_lat, check_out_loc.longitude as check_out_loc_lng');
+                $this->db->from('staff_attendance');
+                $this->db->join('attendance_locations', 'staff_attendance.location_id = attendance_locations.id', 'left');
+                $this->db->join('attendance_locations as check_in_loc', 'staff_attendance.check_in_location_id = check_in_loc.id', 'left');
+                $this->db->join('attendance_locations as check_out_loc', 'staff_attendance.check_out_location_id = check_out_loc.id', 'left');
+            } else {
+                // Only include basic location data
+                $this->db->select('staff_attendance.*, 
+                                   attendance_locations.latitude, attendance_locations.longitude');
+                $this->db->from('staff_attendance');
+                $this->db->join('attendance_locations', 'staff_attendance.location_id = attendance_locations.id', 'left');
+            }
+            
+            $this->db->where('staff_attendance.staff_id', $loggedin_user_id);
+            $this->db->like('staff_attendance.date', date('Y-m'), 'after');
+            $this->db->order_by('staff_attendance.date', 'DESC');
+            $query = $this->db->get();
+            if ($query) {
+                $attendance_records = $query->result();
+            }
+        }
+
+        // Calculate attendance summary
+        $present_days = 0;
+        $absent_days = 0;
+        $half_days = 0;
+        $late_days = 0;
+        
+        foreach ($attendance_records as $record) {
+            switch ($record->status) {
+                case 'P': $present_days++; break;
+                case 'A': $absent_days++; break;
+                case 'H': $half_days++; break;
+                case 'L': $late_days++; break;
+            }
+        }
+        
+        $total_days = count($attendance_records);
+        $present_percentage = $total_days > 0 ? ($present_days / $total_days) * 100 : 0;
+
+        $this->data['staff_info'] = $staff_info;
+        $this->data['attendance_records'] = $attendance_records;
+        $this->data['filter_type'] = $filter_type;
+        $this->data['filter_value'] = $filter_value;
+        $this->data['present_days'] = $present_days;
+        $this->data['absent_days'] = $absent_days;
+        $this->data['half_days'] = $half_days;
+        $this->data['late_days'] = $late_days;
+        $this->data['present_percentage'] = $present_percentage;
+        $this->data['title'] = 'Self Attendance';
+        $this->data['sub_page'] = 'employee/self_attendance';
+        $this->data['main_menu'] = 'employee';
+        
+        // Add date picker assets
+        $this->data['headerelements'] = array(
+            'css' => array(
+                'vendor/daterangepicker/daterangepicker.css',
+            ),
+            'js' => array(
+                'vendor/moment/moment.js',
+                'vendor/daterangepicker/daterangepicker.js',
+            ),
+        );
+        
+        $this->load->view('layout/index', $this->data);
+    }
 }

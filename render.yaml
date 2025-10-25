@@ -1,0 +1,17 @@
+# Render Deployment Configuration
+
+## 1. Create render.yaml
+services:
+  - type: web
+    name: skoolwala-backend
+    env: php
+    buildCommand: echo "No build needed"
+    startCommand: php -S 0.0.0.0:$PORT
+    healthCheckPath: /api/test
+    envVars:
+      - key: APP_ENV
+        value: production
+
+## 2. Deploy via GitHub
+# Connect your GitHub repo to Render
+# Render will auto-deploy on push

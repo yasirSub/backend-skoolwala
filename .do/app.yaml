@@ -1,0 +1,21 @@
+# DigitalOcean App Platform Configuration
+
+## 1. Create .do/app.yaml
+name: skoolwala-backend
+services:
+- name: api
+  source_dir: /
+  github:
+    repo: your-username/skoolwala-backend
+    branch: main
+  run_command: php -S 0.0.0.0:$PORT
+  environment_slug: php
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  routes:
+  - path: /
+  health_check:
+    http_path: /api/test
+  envs:
+  - key: APP_ENV
+    value: production

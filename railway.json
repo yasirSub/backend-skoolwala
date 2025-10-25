@@ -1,0 +1,19 @@
+# Railway Deployment Configuration
+
+## 1. Create railway.json
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "php -S 0.0.0.0:$PORT",
+    "healthcheckPath": "/api/test"
+  }
+}
+
+## 2. Deploy Commands
+npm install -g @railway/cli
+railway login
+railway init
+railway up

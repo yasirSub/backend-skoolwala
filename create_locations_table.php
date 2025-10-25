@@ -1,0 +1,68 @@
+<?php
+// Create locations table script
+// Run: php create_locations_table.php
+
+echo "=== Creating Locations Table ===\n\n";
+
+// Database configuration
+$host = 'localhost';
+$username = 'root';
+$password = '';
+$database = 'skoolwala';
+
+try {
+    echo "Connecting to database: $database\n";
+    $pdo = new PDO("mysql:host=$host;dbname=$database", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    echo "✅ Database connection successful\n\n";
+    
+    // Create table
+    echo "Creating 'locations' table...\n";
+    $sql = "CREATE TABLE IF NOT EXISTS `locations` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `name` varchar(255) NOT NULL COMMENT 'Location name (e.g., Main Office, Branch A)',
+      `latitude` decimal(10,8) NOT NULL COMMENT 'Latitude coordinate',
+      `longitude` decimal(11,8) NOT NULL COMMENT 'Longitude coordinate',
+      `address` text DEFAULT NULL COMMENT 'Full address of the location',
+      `radius` int(11) DEFAULT 100 COMMENT 'Radius in meters for location checking',
+      `branch_id` int(11) DEFAULT NULL COMMENT 'Associated branch ID',
+      `is_active` tinyint(1) DEFAULT 1 COMMENT 'Whether location is active (1) or inactive (0)',
+      `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (`id`),
+      KEY `idx_branch_id` (`branch_id`),
+      KEY `idx_is_active` (`is_active`),
+      KEY `idx_coordinates` (`latitude`, `longitude`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stores location data for attendance and tracking'";
+    
+    $pdo->exec($sql);
+    echo "✅ Table created successfully\n\n";
+    
+    // Insert sample data
+    echo "Inserting sample data...\n";
+    $insertSql = "INSERT INTO `locations` (`name`, `latitude`, `longitude`, `address`, `radius`, `branch_id`, `is_active`) VALUES
+    ('Main Office', 23.8103, 90.4125, 'Dhaka, Bangladesh', 100, 1, 1),
+    ('Branch Office North', 23.8500, 90.4000, 'North Dhaka, Bangladesh', 150, 1, 1),
+    ('Branch Office South', 23.7500, 90.4000, 'South Dhaka, Bangladesh', 120, 1, 1),
+    ('Training Center', 23.8200, 90.4200, 'Training Center, Dhaka', 200, 1, 1)";
+    
+    $pdo->exec($insertSql);
+    echo "✅ Sample data inserted successfully\n\n";
+    
+    // Verify
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM locations");
+    $count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+    echo "📊 Total records in locations table: $count\n\n";
+    
+    echo "🎉 SUCCESS! Location API should now work!\n\n";
+    echo "🧪 Test the API:\n";
+    echo "1. Visit: http://192.168.31.129:8080/api/location/list\n";
+    echo "2. Should return JSON with location data\n";
+    echo "3. Test Flutter app - Location Manager should work\n";
+    
+} catch (Exception $e) {
+    echo "❌ Error: " . $e->getMessage() . "\n";
+}
+
+echo "\n=== Setup Complete ===\n";
+?>

@@ -994,4 +994,97 @@ class School_settings extends Admin_Controller
         $this->data['title'] = translate('student_parent_panel');
         $this->load->view('layout/index', $this->data);
     }
+
+    public function location_settings()
+    {
+        if (!get_permission('school_settings', 'is_view')) {
+            access_denied();
+        }
+
+        $branchID = $this->school_model->getBranchID();
+        
+        if ($_POST) {
+            if (!get_permission('school_settings', 'is_edit')) {
+                ajax_access_denied();
+            }
+            
+            $action = $this->input->post('action');
+            
+            if ($action == 'add_location') {
+                $this->form_validation->set_rules('location_name', 'Location Name', 'trim|required');
+                $this->form_validation->set_rules('latitude', 'Latitude', 'trim|required|numeric');
+                $this->form_validation->set_rules('longitude', 'Longitude', 'trim|required|numeric');
+                $this->form_validation->set_rules('radius', 'Radius', 'trim|required|numeric|greater_than[0]');
+                
+                if ($this->form_validation->run() == true) {
+                    $data = array(
+                        'branch_id' => $branchID,
+                        'name' => $this->input->post('location_name'),
+                        'latitude' => $this->input->post('latitude'),
+                        'longitude' => $this->input->post('longitude'),
+                        'radius' => $this->input->post('radius'),
+                        'address' => $this->input->post('address'),
+                        'description' => $this->input->post('description'),
+                        'is_active' => 1,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'created_by' => get_loggedin_user_id()
+                    );
+                    
+                    $this->db->insert('attendance_locations', $data);
+                    $array = array('status' => 'success', 'message' => 'Location added successfully');
+                } else {
+                    $error = $this->form_validation->error_array();
+                    $array = array('status' => 'fail', 'error' => $error);
+                }
+            } elseif ($action == 'edit_location') {
+                $location_id = $this->input->post('location_id');
+                $this->form_validation->set_rules('location_name', 'Location Name', 'trim|required');
+                $this->form_validation->set_rules('latitude', 'Latitude', 'trim|required|numeric');
+                $this->form_validation->set_rules('longitude', 'Longitude', 'trim|required|numeric');
+                $this->form_validation->set_rules('radius', 'Radius', 'trim|required|numeric|greater_than[0]');
+                
+                if ($this->form_validation->run() == true) {
+                    $data = array(
+                        'name' => $this->input->post('location_name'),
+                        'latitude' => $this->input->post('latitude'),
+                        'longitude' => $this->input->post('longitude'),
+                        'radius' => $this->input->post('radius'),
+                        'address' => $this->input->post('address'),
+                        'description' => $this->input->post('description'),
+                        'is_active' => $this->input->post('is_active'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                        'updated_by' => get_loggedin_user_id()
+                    );
+                    
+                    $this->db->where('id', $location_id);
+                    $this->db->where('branch_id', $branchID);
+                    $this->db->update('attendance_locations', $data);
+                    $array = array('status' => 'success', 'message' => 'Location updated successfully');
+                } else {
+                    $error = $this->form_validation->error_array();
+                    $array = array('status' => 'fail', 'error' => $error);
+                }
+            } elseif ($action == 'delete_location') {
+                $location_id = $this->input->post('location_id');
+                $this->db->where('id', $location_id);
+                $this->db->where('branch_id', $branchID);
+                $this->db->delete('attendance_locations');
+                $array = array('status' => 'success', 'message' => 'Location deleted successfully');
+            }
+            
+            echo json_encode($array);
+            exit();
+        }
+        
+        // Get all locations for this branch
+        $this->db->where('branch_id', $branchID);
+        $this->db->order_by('created_at', 'DESC');
+        $this->data['locations'] = $this->db->get('attendance_locations')->result();
+        
+        $this->data['branch_id'] = $branchID;
+        $this->data['title'] = 'Location Settings';
+        $this->data['sub_page'] = 'school_settings/location_settings';
+        $this->data['main_menu'] = 'school_m';
+        $this->load->view('layout/index', $this->data);
+    }
 }

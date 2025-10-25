@@ -1165,6 +1165,12 @@
                                     <span><i class="fas fa-caret-right"></i><?=translate('employee')?></span>
                                 </a>
                             </li>
+                            <?php } if(get_permission('student_attendance', 'is_add') || get_permission('employee_attendance', 'is_add')) { ?>
+                            <li class="<?php if ($sub_page == 'employee/self_attendance') echo 'nav-active';?>">
+                                <a href="<?=base_url('employee/self_attendance')?>">
+                                    <span><i class="fas fa-caret-right"></i>Self Attendance</span>
+                                </a>
+                            </li>
                             <?php } if(get_permission('exam_attendance', 'is_add')) { ?>
                             <li class="<?php if ($sub_page == 'attendance/exam_entries') echo 'nav-active';?>">
                                 <a href="<?=base_url('attendance/exam_entry')?>">
