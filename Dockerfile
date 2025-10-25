@@ -33,5 +33,8 @@ RUN echo '</Directory>' >> /etc/apache2/apache2.conf
 # Expose port
 EXPOSE 80
 
+# Configure Apache to listen on Render's port
+RUN echo "Listen \${PORT}" > /etc/apache2/ports.conf
+
 # Start Apache
-CMD ["apache2-foreground"]
+CMD sed -i "s/80/\${PORT}/g" /etc/apache2/sites-available/000-default.conf && apache2-foreground
