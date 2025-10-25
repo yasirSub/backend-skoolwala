@@ -17,12 +17,20 @@ class MY_Controller extends CI_Controller
         }
 
         try {
-            $get_config = $this->db->get_where('global_settings', array('id' => 1))->row_array();
-            if (!$get_config) {
-                $get_config = array(); // Default empty config if table doesn't exist or no data
+            $query = $this->db->get_where('global_settings', array('id' => 1));
+            if ($query && $query !== false) {
+                $get_config = $query->row_array();
+                if (!$get_config) {
+                    $get_config = array(); // Default empty config if table doesn't exist or no data
+                }
+            } else {
+                $get_config = array();
             }
         } catch (Exception $e) {
             // If database query fails, use default empty config
+            $get_config = array();
+        } catch (Error $e) {
+            // Catch PHP 7+ Error objects as well
             $get_config = array();
         }
         try {
@@ -41,13 +49,25 @@ class MY_Controller extends CI_Controller
             }
         } catch (Exception $e) {
             // If branch query fails, continue with defaults
+        } catch (Error $e) {
+            // Catch PHP 7+ errors
         }
         
         $this->data['global_config'] = $get_config;
         
         try {
-            $this->data['theme_config'] = $this->db->get_where('theme_settings', array('id' => 1))->row_array();
+            $query = $this->db->get_where('theme_settings', array('id' => 1));
+            if ($query && $query !== false) {
+                $this->data['theme_config'] = $query->row_array();
+                if (!$this->data['theme_config']) {
+                    $this->data['theme_config'] = array();
+                }
+            } else {
+                $this->data['theme_config'] = array();
+            }
         } catch (Exception $e) {
+            $this->data['theme_config'] = array();
+        } catch (Error $e) {
             $this->data['theme_config'] = array();
         }
         
