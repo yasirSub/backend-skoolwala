@@ -16,21 +16,46 @@ class MY_Controller extends CI_Controller
             redirect(site_url('install'));
         }
 
-        $get_config = $this->db->get_where('global_settings', array('id' => 1))->row_array();
-        $branchID = $this->application_model->get_branch_id();
-        if (!empty($branchID)) {
-            $branch = $this->db->select('currency_formats,symbol_position,symbol,currency,timezone')->where('id', $branchID)->get('branch')->row();
-            $get_config['currency'] = $branch->currency;
-            $get_config['currency_symbol'] = $branch->symbol;
-            $get_config['currency_formats'] = $branch->currency_formats;
-            $get_config['symbol_position'] = $branch->symbol_position;
-            if (!empty($branch->timezone)) {
-                $get_config['timezone'] = $branch->timezone;
+        try {
+            $get_config = $this->db->get_where('global_settings', array('id' => 1))->row_array();
+            if (!$get_config) {
+                $get_config = array(); // Default empty config if table doesn't exist or no data
             }
+        } catch (Exception $e) {
+            // If database query fails, use default empty config
+            $get_config = array();
         }
+        try {
+            $branchID = $this->application_model->get_branch_id();
+            if (!empty($branchID)) {
+                $branch = $this->db->select('currency_formats,symbol_position,symbol,currency,timezone')->where('id', $branchID)->get('branch')->row();
+                if ($branch) {
+                    $get_config['currency'] = $branch->currency;
+                    $get_config['currency_symbol'] = $branch->symbol;
+                    $get_config['currency_formats'] = $branch->currency_formats;
+                    $get_config['symbol_position'] = $branch->symbol_position;
+                    if (!empty($branch->timezone)) {
+                        $get_config['timezone'] = $branch->timezone;
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // If branch query fails, continue with defaults
+        }
+        
         $this->data['global_config'] = $get_config;
-        $this->data['theme_config'] = $this->db->get_where('theme_settings', array('id' => 1))->row_array();
-        date_default_timezone_set($get_config['timezone']);
+        
+        try {
+            $this->data['theme_config'] = $this->db->get_where('theme_settings', array('id' => 1))->row_array();
+        } catch (Exception $e) {
+            $this->data['theme_config'] = array();
+        }
+        
+        if (isset($get_config['timezone']) && !empty($get_config['timezone'])) {
+            date_default_timezone_set($get_config['timezone']);
+        } else {
+            date_default_timezone_set('UTC');
+        }
     }
 
     public function get_payment_config()
