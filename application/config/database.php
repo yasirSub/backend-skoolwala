@@ -100,16 +100,43 @@ $db['default'] = array(
 */
 
 // RENDER DATABASE CONFIGURATION (Environment Variables)
+// Parse DATABASE_URL if available, otherwise use individual env vars
+$database_url = getenv('DATABASE_URL');
+$dsn = '';
+$hostname = getenv('DB_HOST') ?: 'localhost';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASS') ?: '';
+$database = getenv('DB_NAME') ?: 'skoolwala';
+$port = getenv('DB_PORT') ?: 5432;
+
+if ($database_url) {
+    // Parse DATABASE_URL: postgresql://user:pass@host:port/dbname
+    $url_parts = parse_url($database_url);
+    if ($url_parts) {
+        $hostname = $url_parts['host'] ?? $hostname;
+        $username = $url_parts['user'] ?? $username;
+        $password = $url_parts['pass'] ?? $password;
+        $database = isset($url_parts['path']) ? ltrim($url_parts['path'], '/') : $database;
+        $port = $url_parts['port'] ?? $port;
+        
+        // Build PostgreSQL DSN for PDO
+        $dsn = "pgsql:host=$hostname;port=$port;dbname=$database";
+    }
+} else {
+    // Build DSN from individual environment variables
+    $dsn = "pgsql:host=$hostname;port=$port;dbname=$database";
+}
+
 $db['default'] = array(
-    'dsn'      => getenv('DATABASE_URL') ?: '',
-    'hostname' => getenv('DB_HOST') ?: 'localhost',
-    'username' => getenv('DB_USER') ?: 'root',
-    'password' => getenv('DB_PASS') ?: '',
-    'database' => getenv('DB_NAME') ?: 'skoolwala',
+    'dsn'      => $dsn,
+    'hostname' => $hostname,
+    'username' => $username,
+    'password' => $password,
+    'database' => $database,
     'dbdriver' => 'pdo',
     'dbprefix' => '',
     'pconnect' => FALSE,
-    'db_debug' => getenv('CI_ENV') === 'development' ? TRUE : FALSE,
+    'db_debug' => (getenv('CI_ENV') === 'development'),
     'cache_on' => FALSE,
     'cachedir' => '',
     'char_set' => 'utf8',
@@ -120,6 +147,6 @@ $db['default'] = array(
     'stricton' => FALSE,
     'failover' => array(),
     'save_queries' => TRUE,
-    'port'         => getenv('DB_PORT') ?: 5432
+    'port'     => $port
 );
 

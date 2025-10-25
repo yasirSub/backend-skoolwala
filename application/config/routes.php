@@ -62,12 +62,23 @@ $domain =  parse_url($url, PHP_URL_HOST);
 if (substr($domain, 0, 4) == 'www.') {
 	$domain = str_replace('www.', '', $domain);
 }
-$db =& DB();
-$saas_default = false;
-if ($db->table_exists("custom_domain")) {
-	$getURL = $db->select('count(id) as cid')->get_where('custom_domain', array('status' => 1, 'url' => $domain))->row()->cid;
-	if($getURL > 0 ) {
-		$route['authentication'] = 'authentication/index/$1';
+try {
+	$db =& DB();
+	$saas_default = false;
+	// Check if custom_domain table exists using a query instead of table_exists()
+	$table_check = $db->query("SELECT to_regclass('public.custom_domain')");
+	if ($table_check && $table_check->row()->to_regclass !== null) {
+		$getURL = $db->select('count(id) as cid')->get_where('custom_domain', array('status' => 1, 'url' => $domain))->row()->cid;
+	} else {
+		$getURL = 0;
+	}
+} catch (Exception $e) {
+	// If database connection fails or table doesn't exist, skip custom domain routing
+	$getURL = 0;
+	$saas_default = false;
+}
+if ($getURL > 0) {
+	$route['authentication'] = 'authentication/index/$1';
 		$route['forgot'] = 'authentication/forgot/$1';
 		$route['teachers'] = 'home/teachers';
 		$route['events'] = 'home/events';
@@ -81,13 +92,10 @@ if ($db->table_exists("custom_domain")) {
 		$route['exam_results'] = 'home/exam_results';
 		$route['certificates'] = 'home/certificates';
 		$route['page/(:any)'] = 'home/page/$1';
-		$route['gallery_view/(:any)'] = 'home/gallery_view/$1';
-		$route['event_view/(:num)'] = 'home/event_view/$1';
-		$route['news_view/(:any)'] = 'home/news_view/$1';
-		$route['default_controller'] = 'home/index';
-	} else {
-		$saas_default = true;
-	}
+	$route['gallery_view/(:any)'] = 'home/gallery_view/$1';
+	$route['event_view/(:num)'] = 'home/event_view/$1';
+	$route['news_view/(:any)'] = 'home/news_view/$1';
+	$route['default_controller'] = 'home/index';
 } else {
 	$saas_default = true;
 }
