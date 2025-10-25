@@ -62,20 +62,50 @@ $domain =  parse_url($url, PHP_URL_HOST);
 if (substr($domain, 0, 4) == 'www.') {
 	$domain = str_replace('www.', '', $domain);
 }
+// Wrap entire database check in try-catch to handle any DB errors gracefully
+$getURL = 0;
+$saas_default = false;
+
 try {
+	// Suppress all errors during DB connection attempt
+	error_reporting(0);
+	@ini_set('display_errors', 0);
+	
 	$db =& DB();
-	$saas_default = false;
-	// Check if custom_domain table exists using a query instead of table_exists()
-	$table_check = $db->query("SELECT to_regclass('public.custom_domain')");
-	if ($table_check && $table_check->row()->to_regclass !== null) {
-		$getURL = $db->select('count(id) as cid')->get_where('custom_domain', array('status' => 1, 'url' => $domain))->row()->cid;
-	} else {
-		$getURL = 0;
+	
+	// Check if we can actually connect
+	if ($db && $db->conn_id) {
+		// Try to check if custom_domain table exists
+		try {
+			$table_check = @$db->query("SELECT to_regclass('public.custom_domain')");
+			if ($table_check && $table_check->num_rows() > 0) {
+				$row = $table_check->row();
+				if ($row && $row->to_regclass !== null) {
+					$getURL = $db->select('count(id) as cid')->get_where('custom_domain', array('status' => 1, 'url' => $domain))->row()->cid;
+				}
+			}
+		} catch (Exception $inner_e) {
+			// Table doesn't exist or query failed, skip
+			$getURL = 0;
+		}
 	}
+	
+	// Restore error reporting
+	error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+	@ini_set('display_errors', 1);
 } catch (Exception $e) {
-	// If database connection fails or table doesn't exist, skip custom domain routing
+	// If database connection fails completely, skip custom domain routing
 	$getURL = 0;
 	$saas_default = false;
+	// Restore error reporting
+	error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+	@ini_set('display_errors', 1);
+} catch (Error $e) {
+	// Catch PHP 7+ errors as well
+	$getURL = 0;
+	$saas_default = false;
+	error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+	@ini_set('display_errors', 1);
 }
 if ($getURL > 0) {
 	$route['authentication'] = 'authentication/index/$1';
