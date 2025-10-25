@@ -101,12 +101,12 @@ $db['default'] = array(
 
 // RENDER DATABASE CONFIGURATION (Environment Variables)
 $db['default'] = array(
-    'dsn'      => '',
+    'dsn'      => getenv('DATABASE_URL') ?: '',
     'hostname' => getenv('DB_HOST') ?: 'localhost',
     'username' => getenv('DB_USER') ?: 'root',
     'password' => getenv('DB_PASS') ?: '',
     'database' => getenv('DB_NAME') ?: 'skoolwala',
-    'dbdriver' => 'mysqli',
+    'dbdriver' => 'pdo',
     'dbprefix' => '',
     'pconnect' => FALSE,
     'db_debug' => getenv('CI_ENV') === 'development' ? TRUE : FALSE,
@@ -120,6 +120,6 @@ $db['default'] = array(
     'stricton' => FALSE,
     'failover' => array(),
     'save_queries' => TRUE,
-    'port'         => getenv('DB_PORT') ?: 3306
+    'port'         => getenv('DB_PORT') ?: 5432
 );
 
