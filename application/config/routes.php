@@ -230,6 +230,12 @@ $route['api/school-location/delete/(:num)'] = 'schoollocation/delete/$1';
 // Employee Face Status Routes
 $route['employee/checkFaceStatus/(:num)'] = 'employee/checkFaceStatus/$1';
 
+// Test environment variables route
+$route['test-env'] = function() {
+    require_once APPPATH . '../test_env.php';
+    exit;
+};
+
 if ($saas_default) {
 	$route['default_controller'] = 'saas_website/index';
 }
