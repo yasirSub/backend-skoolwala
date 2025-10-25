@@ -315,10 +315,20 @@ class Saas_model extends MY_Model
 
     public function getSettings($sel = "*")
     {
-        $this->db->select($sel);
-        $this->db->where('id', 1);
-        $get = $this->db->get('saas_settings')->row();
-        return $get;
+        try {
+            $this->db->select($sel);
+            $this->db->where('id', 1);
+            $query = $this->db->get('saas_settings');
+            if ($query && $query !== false) {
+                $get = $query->row();
+                return $get ? $get : null;
+            }
+            return null;
+        } catch (Exception $e) {
+            return null;
+        } catch (Error $e) {
+            return null;
+        }
     }
 
     public function getPackageDetails($plan_id = '')
