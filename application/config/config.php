@@ -23,12 +23,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | a PHP script and you can easily do that on your own.
 |
 */
-// ONLINE BASE URL (COMMENTED OUT)
-// $config['base_url'] = 'https://school.firmbeginners.com';
-
-// LOCAL BASE URL FOR DEVELOPMENT
-$config['base_url'] = (isset($_SERVER['HTTPS']) ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
-// Alternative: $config['base_url'] = 'http://localhost/skoolwala/';
+// RENDER BASE URL (Environment Variable)
+$config['base_url'] = getenv('BASE_URL') ?: (isset($_SERVER['HTTPS']) ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
 
 
 /*

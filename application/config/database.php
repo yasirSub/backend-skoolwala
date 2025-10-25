@@ -99,17 +99,17 @@ $db['default'] = array(
 );
 */
 
-// LOCAL DATABASE CONFIGURATION
+// RENDER DATABASE CONFIGURATION (Environment Variables)
 $db['default'] = array(
     'dsn'      => '',
-    'hostname' => 'localhost',
-    'username' => 'root',
-    'password' => '',
-    'database' => 'skoolwala',
+    'hostname' => getenv('DB_HOST') ?: 'localhost',
+    'username' => getenv('DB_USER') ?: 'root',
+    'password' => getenv('DB_PASS') ?: '',
+    'database' => getenv('DB_NAME') ?: 'skoolwala',
     'dbdriver' => 'mysqli',
     'dbprefix' => '',
     'pconnect' => FALSE,
-    'db_debug' => FALSE,
+    'db_debug' => getenv('CI_ENV') === 'development' ? TRUE : FALSE,
     'cache_on' => FALSE,
     'cachedir' => '',
     'char_set' => 'utf8',
@@ -120,6 +120,6 @@ $db['default'] = array(
     'stricton' => FALSE,
     'failover' => array(),
     'save_queries' => TRUE,
-    'port'         => 3306
+    'port'         => getenv('DB_PORT') ?: 3306
 );
 

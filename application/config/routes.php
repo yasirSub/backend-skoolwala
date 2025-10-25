@@ -28,6 +28,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | There are three reserved routes:
 |
 |	$route['default_controller'] = 'welcome';
+
+// Health check routes for deployment
+$route['health'] = 'health/index';
+$route['health/test'] = 'health/test';
 |
 | This route indicates which controller class should be loaded if the
 | URI contains no data. In the above example, the "welcome" class
