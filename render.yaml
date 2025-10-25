@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: skoolwala-backend
+    env: php
+    plan: free
+    buildCommand: "composer install --no-dev --optimize-autoloader"
+    startCommand: "php -S 0.0.0.0:$PORT -t ."
+    healthCheckPath: "/api/test"
+    envVars:
+      - key: PHP_VERSION
+        value: 8.2
