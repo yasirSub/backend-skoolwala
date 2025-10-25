@@ -32,6 +32,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // Health check routes for deployment
 $route['health'] = 'health/index';
 $route['health/test'] = 'health/test';
+$route['db/test'] = 'database_test/index';
 |
 | This route indicates which controller class should be loaded if the
 | URI contains no data. In the above example, the "welcome" class

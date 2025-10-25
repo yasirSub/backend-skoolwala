@@ -1,7 +1,7 @@
 FROM php:8.2-apache
 
 # Install required PHP extensions
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN docker-php-ext-install mysqli pdo pdo_mysql pdo_pgsql
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
