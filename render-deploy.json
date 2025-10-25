@@ -1,0 +1,12 @@
+{
+  "name": "skoolwala-backend",
+  "type": "web_service",
+  "buildCommand": "composer install --no-dev --optimize-autoloader",
+  "startCommand": "php -S 0.0.0.0:$PORT -t .",
+  "healthCheckPath": "/api/test",
+  "env": "php",
+  "region": "oregon",
+  "plan": "free",
+  "autoDeploy": true,
+  "branch": "YasirDev"
+}
